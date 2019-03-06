@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
 import './button.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
-  timeDilation = 3.0;
+  timeDilation = 2.0;
   runApp(new MyApp());
 }
 
@@ -46,11 +47,20 @@ class _MyHomePageState extends State<MyHomePage> {
   final httpClient = HttpClient();
 
   getPhoneDetails() async {
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    setState(() {
-      model = androidInfo.model;
-    });
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String device = (prefs.getString('device') ?? "0");
+    if (device == "0") {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      setState(() {
+        model = androidInfo.model;
+      });
+      await prefs.setString('device', device);
+    } else {
+      setState(() {
+        model = device.toString();
+      });
+    }
   }
 
   _getIPAddress(url) async {
@@ -103,25 +113,12 @@ class _MyHomePageState extends State<MyHomePage> {
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
+        //leading: new Container(), for hide
       ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
-          // Column is also layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('$model'),
@@ -151,6 +148,21 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Get Android Model',
         child: Icon(Icons.android),
       ),
+      drawer: SizedBox(
+          width: 180,
+          child: Drawer(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: <Widget>[
+                DrawerHeader(
+                  child: Text('Home'),
+                ),
+                ListTile(
+                  title: Text('Item1'),
+                )
+              ],
+            ),
+          )),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         type: BottomNavigationBarType.fixed,
@@ -162,7 +174,8 @@ class _MyHomePageState extends State<MyHomePage> {
               icon: Icon(Icons.search, color: Colors.black87),
               title: new Container(height: 0.0)),
           BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle,color: Colors.blue), title: new Container(height: 0.0) ),
+              icon: Icon(Icons.add_circle, color: Colors.blue),
+              title: new Container(height: 0.0)),
           BottomNavigationBarItem(
               icon: Icon(Icons.bookmark, color: Colors.black87),
               title: new Container(height: 0.0)),
