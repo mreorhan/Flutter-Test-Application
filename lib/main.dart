@@ -4,8 +4,12 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:device_info/device_info.dart';
 import './button.dart';
+import 'package:flutter/scheduler.dart' show timeDilation;
 
-void main() => runApp(MyApp());
+void main() {
+  timeDilation = 3.0;
+  runApp(new MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -14,7 +18,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        primarySwatch: Colors.blue,
       ),
       home: MyHomePage(title: 'Flutter Get Model'),
     );
@@ -36,9 +40,9 @@ class _MyHomePageState extends State<MyHomePage> {
   String model = "";
   String _ipAddress = "";
   List list = List();
-var isLoading = false;
+  var isLoading = false;
   final url1 = Uri.https('httpbin.org', 'ip');
-  final url2 = Uri.https('http://mighty-wildwood-18390.herokuapp.com', 'users');
+  final url2 = Uri.https('mighty-wildwood-18390.herokuapp.com', 'users');
   final httpClient = HttpClient();
 
   getPhoneDetails() async {
@@ -53,8 +57,7 @@ var isLoading = false;
     setState(() {
       isLoading = true;
     });
-    final response =
-        await http.get(url);
+    final response = await http.get(url);
     if (response.statusCode == 200) {
       list = json.decode(response.body) as List;
       setState(() {
@@ -64,9 +67,8 @@ var isLoading = false;
       throw Exception('Failed to load photos');
     }
   }
-  
 
-  void _showDialog(title,content) {
+  void _showDialog(title, content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -130,15 +132,15 @@ var isLoading = false;
             CustomCard(
               title: "Get IP",
               onPress: () {
-                 _getIPAddress(url2);
-                _showDialog("Your IP",'${_ipAddress ?? "Empty"}');
+                _getIPAddress(url2);
+                _showDialog("Your IP", '${_ipAddress ?? "Empty"}');
               },
             ),
             CustomCard(
               title: "Fetch Api",
               onPress: () {
                 _getIPAddress(url1);
-                _showDialog("Your API",'${list.first.toString() ?? "Empty"}');
+                _showDialog("Your API", '${list.first.toString() ?? "Empty"}');
               },
             )
           ],
@@ -148,7 +150,27 @@ var isLoading = false;
         onPressed: getPhoneDetails,
         tooltip: 'Get Android Model',
         child: Icon(Icons.android),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        type: BottomNavigationBarType.fixed,
+        items: [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home, color: Colors.black87),
+              title: new Container(height: 0.0)), //For reset titles
+          BottomNavigationBarItem(
+              icon: Icon(Icons.search, color: Colors.black87),
+              title: new Container(height: 0.0)),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle,color: Colors.blue), title: new Container(height: 0.0) ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.bookmark, color: Colors.black87),
+              title: new Container(height: 0.0)),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.person, color: Colors.black87),
+              title: new Container(height: 0.0))
+        ],
+      ),
     );
   }
 }
